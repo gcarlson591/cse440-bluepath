@@ -1,0 +1,5 @@
+{
+  "name": "BluePath",
+  "description": "Personalized accessible campus navigation for students and visitors.",
+  "requestFramePermissions": ["geolocation"]
+}
