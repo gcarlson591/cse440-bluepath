@@ -24,17 +24,16 @@ import { GoogleGenAI } from "@google/genai";
 import ReactMarkdown from 'react-markdown';
 import { cn } from './lib/utils';
 
-// Initialize Gemini
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+// Initialize Gemini helper function
+const getGenAI = () => {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new Error("GEMINI_API_KEY is not defined. Please set it in your environment variables.");
+  }
+  return new GoogleGenAI({ apiKey });
+};
 
-const CAMPUSES = [
-  "Stanford University",
-  "UC Berkeley",
-  "MIT",
-  "Harvard University",
-  "University of Washington",
-  "Custom Campus..."
-];
+const CAMPUS_NAME = "University of Washington";
 
 const ACCESSIBILITY_NEEDS = [
   { id: 'wheelchair', label: 'Wheelchair Accessible', icon: Accessibility },
@@ -45,7 +44,6 @@ const ACCESSIBILITY_NEEDS = [
 
 export default function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [selectedCampus, setSelectedCampus] = useState(CAMPUSES[0]);
   const [startPoint, setStartPoint] = useState('');
   const [endPoint, setEndPoint] = useState('');
   const [needs, setNeeds] = useState<string[]>([]);
@@ -66,13 +64,14 @@ export default function App() {
     setGeneratedRoute(null);
 
     try {
+      const ai = getGenAI();
       const needsText = needs.length > 0 
         ? `The user has the following accessibility requirements: ${needs.join(', ')}.` 
         : "The user needs a standard accessible route.";
 
       const prompt = `
         You are BluePath, an expert campus accessibility assistant.
-        The user is at ${selectedCampus}.
+        The user is at ${CAMPUS_NAME}.
         They want to go from "${startPoint}" to "${endPoint}".
         ${needsText}
         
@@ -92,9 +91,9 @@ export default function App() {
       });
 
       setGeneratedRoute(response.text || "Sorry, I couldn't generate a route at this time.");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error generating route:", error);
-      setGeneratedRoute("An error occurred while generating your route. Please try again.");
+      setGeneratedRoute(error.message || "An error occurred while generating your route. Please try again.");
     } finally {
       setIsGenerating(false);
     }
@@ -117,11 +116,10 @@ export default function App() {
 
             {/* Desktop Nav */}
             <div className="hidden md:flex items-center gap-8">
-              <a href="#" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">Features</a>
-              <a href="#" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">Campuses</a>
+              <a href="#" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">UW Map</a>
               <a href="#" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">About</a>
               <button className="bg-blue-600 text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-blue-700 transition-all shadow-md shadow-blue-100 active:scale-95">
-                Get Started
+                UW Login
               </button>
             </div>
 
@@ -179,10 +177,10 @@ export default function App() {
                   Redefining Campus Mobility
                 </div>
                 <h1 className="text-5xl md:text-7xl font-display font-bold text-slate-900 leading-[1.1] mb-6">
-                  Navigate your campus <span className="text-blue-600">without barriers.</span>
+                  Navigate <span className="text-blue-600">UW</span> without barriers.
                 </h1>
                 <p className="text-xl text-slate-600 mb-10 leading-relaxed max-w-xl">
-                  BluePath provides personalized, accessible routes for students, faculty, and visitors. Find the smoothest path to your next class, meeting, or event.
+                  BluePath provides personalized, accessible routes for University of Washington students, faculty, and visitors. Find the smoothest path to your next class at Red Square or the HUB.
                 </p>
                 <div className="flex flex-wrap gap-4">
                   <button className="bg-blue-600 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:bg-blue-700 transition-all shadow-xl shadow-blue-200 flex items-center gap-2 group">
@@ -230,14 +228,10 @@ export default function App() {
 
                   <form onSubmit={handleGenerateRoute} className="space-y-6">
                     <div>
-                      <label className="block text-sm font-bold text-slate-700 mb-2">Select Campus</label>
-                      <select 
-                        value={selectedCampus}
-                        onChange={(e) => setSelectedCampus(e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
-                      >
-                        {CAMPUSES.map(c => <option key={c} value={c}>{c}</option>)}
-                      </select>
+                      <label className="block text-sm font-bold text-slate-700 mb-2">Campus</label>
+                      <div className="w-full bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 text-slate-600 font-medium">
+                        {CAMPUS_NAME}
+                      </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -396,7 +390,7 @@ export default function App() {
               <div className="relative z-10">
                 <h2 className="text-4xl md:text-6xl font-display font-bold text-white mb-8">Ready to find your path?</h2>
                 <p className="text-xl text-slate-400 mb-12 max-w-2xl mx-auto">
-                  Join thousands of students making their campus more accessible. Download the app or start using our web tool today.
+                  Join thousands of UW students making their campus more accessible. Download the app or start using our web tool today.
                 </p>
                 <div className="flex flex-wrap justify-center gap-4">
                   <button className="bg-white text-slate-900 px-10 py-5 rounded-2xl font-bold text-lg hover:bg-slate-100 transition-all flex items-center gap-3">
@@ -432,14 +426,14 @@ export default function App() {
                 </span>
               </div>
               <p className="text-slate-500 text-sm leading-relaxed">
-                Making campus navigation accessible for everyone, one path at a time.
+                Making UW campus navigation accessible for everyone, one path at a time.
               </p>
             </div>
             <div>
               <h4 className="font-bold text-slate-900 mb-6">Product</h4>
               <ul className="space-y-4 text-sm text-slate-500">
                 <li><a href="#" className="hover:text-blue-600 transition-colors">Features</a></li>
-                <li><a href="#" className="hover:text-blue-600 transition-colors">Campus Maps</a></li>
+                <li><a href="#" className="hover:text-blue-600 transition-colors">UW Campus Maps</a></li>
                 <li><a href="#" className="hover:text-blue-600 transition-colors">Mobile App</a></li>
                 <li><a href="#" className="hover:text-blue-600 transition-colors">API</a></li>
               </ul>

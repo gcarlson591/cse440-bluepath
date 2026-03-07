@@ -1,5 +1,5 @@
 {
   "name": "BluePath",
-  "description": "Personalized accessible campus navigation for students and visitors.",
+  "description": "Personalized accessible campus navigation for University of Washington students and visitors.",
   "requestFramePermissions": ["geolocation"]
 }
